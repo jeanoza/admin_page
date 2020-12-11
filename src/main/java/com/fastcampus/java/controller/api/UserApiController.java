@@ -1,0 +1,27 @@
+package com.fastcampus.java.controller.api;
+
+import com.fastcampus.java.controller.CrudController;
+import com.fastcampus.java.model.entity.User;
+import com.fastcampus.java.model.network.request.UserApiRequest;
+import com.fastcampus.java.model.network.response.UserApiResponse;
+import com.fastcampus.java.service.UserApiLogicService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.PostConstruct;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/user")
+public class UserApiController extends CrudController<UserApiRequest, UserApiResponse> {
+
+    @Autowired
+    private UserApiLogicService userApiLogicService;
+
+    @PostConstruct
+    public void init() {
+        this.baseService = userApiLogicService;
+    }
+
+}

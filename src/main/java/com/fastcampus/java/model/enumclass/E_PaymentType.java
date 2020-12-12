@@ -7,8 +7,8 @@ import lombok.Getter;
 @Getter
 public enum E_PaymentType {
     CARD(0, "credit card", "pay by credit card"),
-    CASH(1, "cash", "pay by cash"),
-    BANK(2, "bank", "pay by bank")
+    CHECK_CARD(1, "cash", "pay by cash"),
+    BANK_TRANSFER(2, "bank", "pay by bank")
     ;
     private Integer Id;
     private String title;

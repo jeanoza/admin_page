@@ -2,6 +2,7 @@ package com.fastcampus.java.repository;
 
 import com.fastcampus.java.JavaApplicationTests;
 import com.fastcampus.java.model.entity.Partner;
+import com.fastcampus.java.model.enumclass.E_Status;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ public class PartnerRepositoryTest extends JavaApplicationTests {
     @Test
     public void create() {
         String name = "Partner01";
-        String status = "REGISTERED";
+        E_Status status = E_Status.REGISTERED;
         String address = "Paris 5e";
         String callCenter = "070-1111-2222";
         String partnerNumber = "010-1111-2222";

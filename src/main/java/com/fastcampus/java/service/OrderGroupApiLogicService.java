@@ -3,14 +3,19 @@ package com.fastcampus.java.service;
 import com.fastcampus.java.controller.ifs.CrudInterface;
 import com.fastcampus.java.model.entity.OrderGroup;
 import com.fastcampus.java.model.network.Header;
+import com.fastcampus.java.model.network.Pagination;
 import com.fastcampus.java.model.network.request.OrderGroupApiRequest;
 import com.fastcampus.java.model.network.response.OrderGroupApiResponse;
 import com.fastcampus.java.repository.OrderGroupRepository;
 import com.fastcampus.java.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderGroupApiLogicService implements CrudInterface<OrderGroupApiRequest, OrderGroupApiResponse> {
@@ -40,7 +45,7 @@ public class OrderGroupApiLogicService implements CrudInterface<OrderGroupApiReq
                 .build();
         OrderGroup newOrderGroup = orderGroupRepository.save(orderGroup);
 
-        return response(newOrderGroup);
+        return Header.OK(response(newOrderGroup));
     }
 
     @Override
@@ -48,6 +53,7 @@ public class OrderGroupApiLogicService implements CrudInterface<OrderGroupApiReq
 
         return orderGroupRepository.findById(id)
                 .map(this::response) // .map(orderGroup->response(orderGroup)
+                .map(Header::OK)
                 .orElseGet(() -> Header.ERROR("데이터 없음"));
     }
 
@@ -69,11 +75,12 @@ public class OrderGroupApiLogicService implements CrudInterface<OrderGroupApiReq
                             .setOrderAt(body.getOrderAt())
                             .setArrivalDate(body.getArrivalDate())
                             .setUser(userRepository.getOne(body.getUserId()))
-                            ;
+                    ;
                     return orderGroup;
                 })
                 .map(changeOrderGroup -> orderGroupRepository.save(changeOrderGroup))
                 .map(this::response)
+                .map(Header::OK)
                 .orElseGet(() -> Header.ERROR("데이터 없음"));
 
     }
@@ -89,7 +96,27 @@ public class OrderGroupApiLogicService implements CrudInterface<OrderGroupApiReq
                 .orElseGet(()->Header.ERROR("데이터 없음"));
     }
 
-    private Header<OrderGroupApiResponse> response(OrderGroup orderGroup) {
+    @Override
+    public Header<List<OrderGroupApiResponse>> search(Pageable pageable) {
+        Page<OrderGroup> orderGroups = orderGroupRepository.findAll(pageable);
+
+        //1st
+        List<OrderGroupApiResponse> orderGroupApiResponseList = orderGroups.stream()
+                .map(this::response)
+                .collect(Collectors.toList());
+
+        //2st
+        Pagination pagination = Pagination.builder()
+                .totalPages(orderGroups.getTotalPages())
+                .totalElements(orderGroups.getTotalElements())
+                .currentPage(orderGroups.getNumber())
+                .currentElements(orderGroups.getNumberOfElements())
+                .build();
+
+        return Header.OK(orderGroupApiResponseList, pagination);
+    }
+
+    private OrderGroupApiResponse response(OrderGroup orderGroup) {
         OrderGroupApiResponse body = OrderGroupApiResponse.builder()
                 .id(orderGroup.getId())
                 .status(orderGroup.getStatus())
@@ -104,6 +131,6 @@ public class OrderGroupApiLogicService implements CrudInterface<OrderGroupApiReq
                 .userId(orderGroup.getUser().getId())
                 .build();
 
-        return Header.OK(body);
+        return body;
     }
 }

@@ -3,15 +3,20 @@ package com.fastcampus.java.service;
 import com.fastcampus.java.controller.ifs.CrudInterface;
 import com.fastcampus.java.model.entity.Item;
 import com.fastcampus.java.model.network.Header;
+import com.fastcampus.java.model.network.Pagination;
 import com.fastcampus.java.model.network.request.ItemApiRequest;
 import com.fastcampus.java.model.network.response.ItemApiResponse;
 import com.fastcampus.java.repository.ItemRepository;
 import com.fastcampus.java.repository.PartnerRepository;
 import com.fastcampus.java.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ItemApiLogicService implements CrudInterface<ItemApiRequest, ItemApiResponse>{
@@ -40,14 +45,15 @@ public class ItemApiLogicService implements CrudInterface<ItemApiRequest, ItemAp
 
         Item newItem = itemRepository.save(item);
 
-        return response(newItem);
+        return Header.OK(response(newItem));
     }
 
     @Override
     public Header<ItemApiResponse> read(Long id) {
 
         return itemRepository.findById(id)
-                .map(item -> response(item))
+                .map(this::response)
+                .map(Header::OK)
                 .orElseGet(() -> Header.ERROR("데이터 없음"));
 
     }
@@ -69,7 +75,8 @@ public class ItemApiLogicService implements CrudInterface<ItemApiRequest, ItemAp
                             .setUnregisteredAt(body.getUnregisteredAt())
                 )
                 .map(newEntityItem -> itemRepository.save(newEntityItem))
-                .map(item -> response(item))
+                .map(this::response)
+                .map(Header::OK)
                 .orElseGet(() -> Header.ERROR("데이터 없음"));
 
     }
@@ -84,7 +91,29 @@ public class ItemApiLogicService implements CrudInterface<ItemApiRequest, ItemAp
                 .orElseGet(() -> Header.ERROR("데이터 없음"));
     }
 
-    private Header<ItemApiResponse> response(Item item) {
+    @Override
+    public Header<List<ItemApiResponse>> search(Pageable pageable) {
+
+        Page<Item> items = itemRepository.findAll(pageable);
+
+        //1st
+        List<ItemApiResponse> itemApiResponseList = items.stream()
+                .map(this::response)
+                .collect(Collectors.toList());
+
+        //2nd
+        Pagination pagination = Pagination.builder()
+                .currentElements(items.getNumberOfElements())
+                .currentPage(items.getNumber())
+                .totalElements(items.getTotalElements())
+                .totalPages(items.getTotalPages())
+                .build();
+
+
+        return Header.OK(itemApiResponseList, pagination);
+    }
+
+    private ItemApiResponse response(Item item) {
 
         ItemApiResponse body = ItemApiResponse.builder()
                 .id(item.getId())
@@ -99,6 +128,6 @@ public class ItemApiLogicService implements CrudInterface<ItemApiRequest, ItemAp
                 .partnerId(item.getPartner().getId())
                 .build();
 
-        return Header.OK(body);
+        return body;
     }
 }

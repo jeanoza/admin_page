@@ -3,13 +3,19 @@ package com.fastcampus.java.service;
 import com.fastcampus.java.controller.ifs.CrudInterface;
 import com.fastcampus.java.model.entity.OrderDetail;
 import com.fastcampus.java.model.network.Header;
+import com.fastcampus.java.model.network.Pagination;
 import com.fastcampus.java.model.network.request.OrderDetailApiRequest;
 import com.fastcampus.java.model.network.response.OrderDetailApiResponse;
 import com.fastcampus.java.repository.ItemRepository;
 import com.fastcampus.java.repository.OrderDetailRepository;
 import com.fastcampus.java.repository.OrderGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderDetailApiLogicService implements CrudInterface<OrderDetailApiRequest, OrderDetailApiResponse> {
@@ -38,13 +44,14 @@ public class OrderDetailApiLogicService implements CrudInterface<OrderDetailApiR
 
         OrderDetail newOrderDetail = orderDetailRepository.save(orderDetail);
 
-        return response(newOrderDetail);
+        return Header.OK(response(newOrderDetail));
     }
 
     @Override
     public Header<OrderDetailApiResponse> read(Long id) {
         return orderDetailRepository.findById(id)
                 .map(this::response)
+                .map(Header::OK)
                 .orElseGet(() -> Header.ERROR("No data"));
     }
 
@@ -63,6 +70,7 @@ public class OrderDetailApiLogicService implements CrudInterface<OrderDetailApiR
                 )
                 .map(updatedOrderDetail -> orderDetailRepository.save(updatedOrderDetail))
                 .map(this::response)
+                .map(Header::OK)
                 .orElseGet(() -> Header.ERROR("No data"));
     }
 
@@ -76,7 +84,26 @@ public class OrderDetailApiLogicService implements CrudInterface<OrderDetailApiR
                 .orElseGet(() -> Header.ERROR("No data"));
     }
 
-    private Header<OrderDetailApiResponse> response(OrderDetail orderDetail) {
+    @Override
+    public Header<List<OrderDetailApiResponse>> search(Pageable pageable) {
+        Page<OrderDetail> orderDetails = orderDetailRepository.findAll(pageable);
+
+        //1st parameter in Header.OK()
+        List<OrderDetailApiResponse> orderDetailApiResponseList = orderDetails.stream()
+                .map(orderDetail -> response(orderDetail))
+                .collect(Collectors.toList());
+        //2nd parameter in Header.OK()
+        Pagination pagination = Pagination.builder()
+                .totalPages(orderDetails.getTotalPages())
+                .totalElements(orderDetails.getTotalElements())
+                .currentPage(orderDetails.getNumber())
+                .currentElements(orderDetails.getNumberOfElements())
+                .build();
+
+        return Header.OK(orderDetailApiResponseList, pagination);
+    }
+
+    private OrderDetailApiResponse response(OrderDetail orderDetail) {
         OrderDetailApiResponse body = OrderDetailApiResponse.builder()
                 .id(orderDetail.getId())
                 .status(orderDetail.getStatus())
@@ -87,6 +114,6 @@ public class OrderDetailApiLogicService implements CrudInterface<OrderDetailApiR
                 .itemId(orderDetail.getItem().getId())
                 .build();
 
-        return Header.OK(body);
+        return body;
     }
 }

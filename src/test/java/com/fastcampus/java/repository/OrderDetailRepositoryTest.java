@@ -2,6 +2,7 @@ package com.fastcampus.java.repository;
 
 import com.fastcampus.java.JavaApplicationTests;
 import com.fastcampus.java.model.entity.OrderDetail;
+import com.fastcampus.java.model.enumclass.E_Status;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ class OrderDetailRepositoryTest extends JavaApplicationTests {
     @Test
     public void create(){
         OrderDetail orderDetail = new OrderDetail();
-        orderDetail.setStatus("FAIL");
+        orderDetail.setStatus(E_Status.FAIL);
         orderDetail.setArrivalDate(LocalDateTime.now().plusDays(2));
         orderDetail.setQuantity(1);
         orderDetail.setTotalPrice(BigDecimal.valueOf(90000));

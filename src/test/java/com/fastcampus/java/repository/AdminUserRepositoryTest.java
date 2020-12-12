@@ -2,6 +2,7 @@ package com.fastcampus.java.repository;
 
 import com.fastcampus.java.JavaApplicationTests;
 import com.fastcampus.java.model.entity.AdminUser;
+import com.fastcampus.java.model.enumclass.E_Status;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ public class AdminUserRepositoryTest extends JavaApplicationTests {
         AdminUser adminUser = new AdminUser();
         adminUser.setAccount("AdminUser03");
         adminUser.setPassword("AdminUser03");
-        adminUser.setStatus("REGISTERED");
+        adminUser.setStatus(E_Status.REGISTERED);
         adminUser.setRole("PARTNER");
 
         AdminUser newAdminUser = adminUserRepository.save(adminUser);

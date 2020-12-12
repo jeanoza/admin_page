@@ -3,13 +3,18 @@ package com.fastcampus.java.service;
 import com.fastcampus.java.controller.ifs.CrudInterface;
 import com.fastcampus.java.model.entity.AdminUser;
 import com.fastcampus.java.model.network.Header;
+import com.fastcampus.java.model.network.Pagination;
 import com.fastcampus.java.model.network.request.AdminUserApiRequest;
 import com.fastcampus.java.model.network.response.AdminUserApiResponse;
 import com.fastcampus.java.repository.AdminUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminUserApiLogicService implements CrudInterface<AdminUserApiRequest, AdminUserApiResponse> {
@@ -33,13 +38,14 @@ public class AdminUserApiLogicService implements CrudInterface<AdminUserApiReque
                 .build();
         AdminUser newAdminUser = adminUserRepository.save(adminUser);
 
-        return response(newAdminUser);
+        return Header.OK(response(newAdminUser));
     }
 
     @Override
     public Header<AdminUserApiResponse> read(Long id) {
         return adminUserRepository.findById(id)
                 .map(this::response)
+                .map(Header::OK)
                 .orElseGet(() -> Header.ERROR("NO DATA"));
     }
 
@@ -61,6 +67,7 @@ public class AdminUserApiLogicService implements CrudInterface<AdminUserApiReque
                 )
                 .map(updatedAdminUser -> adminUserRepository.save(updatedAdminUser))
                 .map(this::response)
+                .map(Header::OK)
                 .orElseGet(() -> Header.ERROR("NO DATA"));
     }
 
@@ -74,7 +81,27 @@ public class AdminUserApiLogicService implements CrudInterface<AdminUserApiReque
                 .orElseGet(()->Header.ERROR("NO DATA"));
     }
 
-    private Header<AdminUserApiResponse> response(AdminUser adminUser) {
+    @Override
+    public Header<List<AdminUserApiResponse>> search(Pageable pageable) {
+        Page<AdminUser> adminUsers = adminUserRepository.findAll(pageable);
+
+        //1st
+        List<AdminUserApiResponse> adminUserApiResponseList = adminUsers.stream()
+                .map(this::response)
+                .collect(Collectors.toList());
+
+        //2nd
+        Pagination pagination = Pagination.builder()
+                .currentElements(adminUsers.getNumberOfElements())
+                .currentPage(adminUsers.getNumber())
+                .totalElements(adminUsers.getTotalElements())
+                .totalPages(adminUsers.getTotalPages())
+                .build();
+
+        return Header.OK(adminUserApiResponseList, pagination);
+    }
+
+    private AdminUserApiResponse response(AdminUser adminUser) {
         AdminUserApiResponse body = AdminUserApiResponse.builder()
                 .id(adminUser.getId())
                 .account(adminUser.getAccount())
@@ -87,7 +114,7 @@ public class AdminUserApiLogicService implements CrudInterface<AdminUserApiReque
                 .registeredAt(adminUser.getRegisteredAt())
                 .unregisteredAt(adminUser.getUnregisteredAt())
                 .build();
-        return Header.OK(body);
+        return body;
     }
 
 }

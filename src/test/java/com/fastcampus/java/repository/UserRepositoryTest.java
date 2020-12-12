@@ -3,6 +3,7 @@ package com.fastcampus.java.repository;
 import com.fastcampus.java.JavaApplicationTests;
 import com.fastcampus.java.model.entity.Item;
 import com.fastcampus.java.model.entity.User;
+import com.fastcampus.java.model.enumclass.E_Status;
 import com.sun.xml.bind.v2.runtime.output.SAXOutput;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ public class UserRepositoryTest extends JavaApplicationTests {
     public void create() {
         String account = "choikb916";
         String password = "07449945";
-        String status = "REGISTERED";
+        E_Status status = E_Status.REGISTERED;
         String email = "choikb916@gmail.com";
         String phoneNumber = "010-1111-3333";
         LocalDateTime registeredAt = LocalDateTime.now();

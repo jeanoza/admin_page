@@ -2,11 +2,13 @@ package com.fastcampus.java.repository;
 
 import com.fastcampus.java.JavaApplicationTests;
 import com.fastcampus.java.model.entity.Item;
+import com.fastcampus.java.model.enumclass.E_Status;
 import org.assertj.core.api.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -22,11 +24,11 @@ public class ItemRepositoryTest extends JavaApplicationTests {
     public void create() {
 
         Item item = new Item();
-        item.setStatus("UNREGISTERED");
+        item.setStatus(E_Status.UNREGISTERED);
         item.setName("Samsung NoteBook");
         item.setTitle("Samsung NT-100");
         item.setContent("Model 2019");
-        item.setPrice(900000);
+        item.setPrice(BigDecimal.valueOf(90000));
         item.setBrandName("Samsung");
 
         item.setRegisteredAt(LocalDateTime.now());

@@ -113,6 +113,8 @@ public class ItemApiLogicService implements CrudInterface<ItemApiRequest, ItemAp
         return Header.OK(itemApiResponseList, pagination);
     }
 
+
+
     private ItemApiResponse response(Item item) {
 
         ItemApiResponse body = ItemApiResponse.builder()
@@ -129,5 +131,9 @@ public class ItemApiLogicService implements CrudInterface<ItemApiRequest, ItemAp
                 .build();
 
         return body;
+    }
+
+    public List<Item> findItems() {
+        return itemRepository.findAll();
     }
 }

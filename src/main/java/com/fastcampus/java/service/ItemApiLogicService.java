@@ -133,7 +133,4 @@ public class ItemApiLogicService implements CrudInterface<ItemApiRequest, ItemAp
         return body;
     }
 
-    public List<Item> findItems() {
-        return itemRepository.findAll();
-    }
 }

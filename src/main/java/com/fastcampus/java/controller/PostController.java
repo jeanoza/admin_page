@@ -32,8 +32,8 @@ public class PostController {
      * 주로 삭제에 사용(Delete)
      */
     /** HTTP Method 정리 CRUD (http://...)
-     * GET - 조회(Read) : /usr/{id}
      * POST - Create : /usr
+     * GET - 조회(Read) : /usr/{id}
      * PUT/PATCH - Update : /usr
      * DELETE - Delete : /usr/{1}
      *

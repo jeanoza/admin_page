@@ -148,4 +148,8 @@ public class UserApiLogicService implements CrudInterface<UserApiRequest, UserAp
 
         return userApiResponse;
     }
+
+    public List<User> findUsers() {
+        return null;
+    }
 }
